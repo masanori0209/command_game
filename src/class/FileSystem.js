@@ -28,22 +28,54 @@ const FileSystem = class FileSystem {
         this.children.push(childNode)
         childNode.parent = this
     }
-    changeDirectory (changePath) {
-        console.log(this)
-        console.log(changePath)
-        if (changePath.length == 0) return this
+    changeDirectory (path, changePath) {
+        console.log('f1: ', this)
+        console.log('f2: ', changePath)
+        if (changePath.length == 0 || changePath == undefined) {
+            console.log('fans: ', changePath)
+            return this
+        }
+        // ほんとはホームディレクトリ
+        if (path[0] == '~') {
+            console.log('f3: ', path)
+            changePath.shift()
+            var p = ''
+            if (path.charAt(0) + path.charAt(1) == '~/') p = path.slice(2)
+            else p = path.slice(1)
+            return this.getRoot().changeDirectory(p, changePath)
+        }
+        // 何もないときはルートに
+        if (path[0] == '' && path.length == 0) {
+            console.log('f4: ', path)
+            return this.getRoot().changeDirectory('', [])
+        }
+        // ルートからたどる
+        if (path[0] == '/') {
+            console.log('f5: ', path)
+            changePath.shift()
+            return this.getRoot().changeDirectory(path.slice(1), changePath)
+        }
         // 一つ前へ
         if (changePath[0] == '..') {
+            console.log('f6: ', path)
             changePath.shift()
-            return this.parent.changeDirectory(changePath)
-        } else if (changePath[0] == '')
-        for (let c in this.children) {
-            if (this.children[c].name == changePath[0]) {
-                changePath.shift()
-                return this.children[c].changeDirectory(changePath)
+            return this.parent.changeDirectory(path, changePath)
+        } else {
+            console.log('f7: ', path)
+            for (let c in this.children) {
+                if (this.children[c].name == changePath[0]) {
+                    changePath.shift()
+                    return this.children[c].changeDirectory(path, changePath)
+                }
             }
         }
-        return this
+    }
+    listFiles () {
+        let res = ''
+        for (let c in this.children) {
+            res += this.children[c].name + '\t'
+        }
+        return res
     }
     searchChildren (searchResult, searchName) {
         if (this.id === searchName) searchResult.push(this)

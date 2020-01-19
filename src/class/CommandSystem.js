@@ -3,16 +3,13 @@ const CommandSystem = function CommandSystem (state, command) {
     var commandQuery = state.inputLine.split(' ')
     var res = ''
     try {
+        let path = commandQuery[1]
         switch (commandQuery[0]) {
             case 'cd':
-                let path = commandQuery[1]
                 try {
                     // 最初のターゲットディレクトリ策定 : homedirは変えること
-                    if (path == undefined || path == '' || path[0] == '/' || path[0] == '~') {
-                        state.current = state.root
-                    }
-                    const dir = state.current.changeDirectory(path.split('/'))
-                    console.log('cd: ', dir)
+                    const dir = state.current.changeDirectory(path, path.split('/'))
+                    console.log('cd1: ', dir)
                     // path見つかんない場合
                     if (dir == undefined) {
                         res = 'cd: ' + commandQuery[1] + ': No such file or directory'
@@ -20,14 +17,34 @@ const CommandSystem = function CommandSystem (state, command) {
                     // 見つかったらそのディレクトリに移動
                         state.current = dir
                     }
-                    console.log('cd: ', state.current)
+                    console.log('cd2: ', state.current)
                 } catch (e) {
+                    res = 'cd: ' + commandQuery[1] + ': No such file or directory'
                     console.error(e)
                 }
                 break
             case 'mkdir':
                 break
             case 'ls':
+                try {
+                    if (path != undefined) {
+                        // 最初のターゲットディレクトリ策定 : homedirは変えること
+                        const dir = state.current.changeDirectory(path, path.split('/'))
+                        console.log('cd1: ', dir)
+                        // path見つかんない場合
+                        if (dir == undefined) {
+                            res = 'ls: ' + commandQuery[1] + ': No such file or directory'
+                        } else {
+                            res = dir.listFiles()
+                        }
+                        console.log('cd2: ', state.current)
+                    } else {
+                        res = state.current.listFiles()
+                    }
+                } catch (e) {
+                    res = 'ls: ' + commandQuery[1] + ': No such file or directory'
+                    console.error(e)
+                }
                 break
             case 'touch':
                 break
