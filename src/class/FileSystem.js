@@ -22,6 +22,8 @@ const FileSystem = class FileSystem {
         this.parent = null
         this.current = []
         this.children = []
+        this.createdAt = new Date()
+        this.isHome = false
     }
     addChild (childNode) {
         console.log(this)
@@ -63,17 +65,18 @@ const FileSystem = class FileSystem {
         } else {
             console.log('f7: ', path)
             for (let c in this.children) {
-                if (this.children[c].name == changePath[0]) {
+                if (this.children[c].name === changePath[0] && this.children[c].type === 1) {
                     changePath.shift()
                     return this.children[c].changeDirectory(path, changePath)
                 }
             }
         }
     }
-    listFiles () {
+    listFiles (option) {
         let res = ''
         for (let c in this.children) {
-            res += this.children[c].name + '\t'
+            let list_str =  this.children[c].type === 0 ? this.children[c].name : this.children[c].name + '/'
+            res += list_str + '\t'
         }
         return res
     }
@@ -90,6 +93,10 @@ const FileSystem = class FileSystem {
         this.parent.searchParents(searchResult, searchName)
     }
     getRoot () {
+        if (this.parent === null) return this
+        else return this.parent.getRoot()
+    }
+    getHome () {
         if (this.parent === null) return this
         else return this.parent.getRoot()
     }

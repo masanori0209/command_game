@@ -1,4 +1,4 @@
-
+import FileSystem from '@/class/FileSystem'
 const CommandSystem = function CommandSystem (state, command) {
     var commandQuery = state.inputLine.split(' ')
     var res = ''
@@ -24,6 +24,35 @@ const CommandSystem = function CommandSystem (state, command) {
                 }
                 break
             case 'mkdir':
+                try {
+                    if (path != undefined) {
+                        // 最初のターゲットディレクトリ策定 : homedirは変えること
+                        let pathSplits = path.split('/')
+                        let newDir = pathSplits.pop()
+                        console.log('pop: ', pathSplits)
+                        // path全体
+                        const dir = state.current.changeDirectory(path, path.split('/'))
+                        // path手前まで
+                        const dirPre = state.current.changeDirectory(path, pathSplits)
+                        console.log('cd1: ', dir)
+                        // path見つかんない場合
+                        if (dir == undefined && dirPre == undefined) {
+                            res = 'mkdir: ' + commandQuery[1] + ': No such file or directory'
+                        // pathは存在しつつmkdirできる体制
+                        } else if (dir == undefined && dirPre != undefined) { 
+                            dirPre.addChild(new FileSystem(newDir, 1, 755, 'user', 'user'))
+                        // どっちも存在する場合
+                        } else {
+                            res = 'mkdir: ' + commandQuery[1] + ': File exists'
+                        }
+                        console.log('cd2: ', state.current)
+                    } else {
+                        res = 'usage: mkdir directory ...'
+                    }
+                } catch (e) {
+                    res = 'mkdir: ' + commandQuery[1] + ': No such file or directory'
+                    console.error(e)
+                }
                 break
             case 'ls':
                 try {
@@ -47,6 +76,37 @@ const CommandSystem = function CommandSystem (state, command) {
                 }
                 break
             case 'touch':
+                try {
+                    if (path != undefined) {
+                        // 最初のターゲットディレクトリ策定 : homedirは変えること
+                        let pathSplits = path.split('/')
+                        let newFile = pathSplits.pop()
+                        console.log('pop: ', pathSplits)
+                        // path全体
+                        const dir = state.current.changeDirectory(path, path.split('/'))
+                        // path手前まで
+                        const dirPre = state.current.changeDirectory(path, pathSplits)
+                        console.log('cd1: ', dir)
+                        // path見つかんない場合
+                        if (dir == undefined && dirPre == undefined) {
+                            res = 'touch: ' + commandQuery[1] + ': Not a directory'
+                        // pathは存在しつつtouchできる体制
+                        } else if (dir == undefined && dirPre != undefined) { 
+                            // file作成
+                            dirPre.addChild(new FileSystem(newFile, 0, 755, 'user', 'user'))
+                        // どっちも存在する場合
+                        } else {
+                            // timestamp 更新
+                            dirPre.createdAt = new Date()
+                        }
+                        console.log('cd2: ', state.current)
+                    } else {
+                        res = 'touch: ' + commandQuery[1] + ': No such file or directory'
+                    }
+                } catch (e) {
+                    res = 'touch: ' + commandQuery[1] + ': No such file or directory'
+                    console.error(e)
+                }
                 break
             case 'rm':
                 break
