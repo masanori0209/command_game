@@ -39,8 +39,16 @@ const CommandSystem = function CommandSystem (state, command) {
                         if (dir == undefined && dirPre == undefined) {
                             res = 'mkdir: ' + commandQuery[1] + ': No such file or directory'
                         // pathは存在しつつmkdirできる体制
-                        } else if (dir == undefined && dirPre != undefined) { 
-                            dirPre.addChild(new FileSystem(newDir, 1, 755, 'user', 'user'))
+                        } else if (dir == undefined && dirPre != undefined) {
+                            let isExist = false
+                            for (let i in dirPre.children) {
+                                if (newDir === dirPre.children[i].name) isExist = true
+                            }
+                            if (!isExist) {
+                                dirPre.addChild(new FileSystem(newDir, 1, 755, 'user', 'user'))
+                            } else {
+                                res = 'mkdir: ' + commandQuery[1] + ': File exists'
+                            }
                         // どっちも存在する場合
                         } else {
                             res = 'mkdir: ' + commandQuery[1] + ': File exists'
@@ -92,8 +100,15 @@ const CommandSystem = function CommandSystem (state, command) {
                             res = 'touch: ' + commandQuery[1] + ': Not a directory'
                         // pathは存在しつつtouchできる体制
                         } else if (dir == undefined && dirPre != undefined) { 
-                            // file作成
-                            dirPre.addChild(new FileSystem(newFile, 0, 755, 'user', 'user'))
+                            let isExist = false
+                            for (let i in dirPre.children) {
+                                if (newDir === dirPre.children[i].name) isExist = true
+                            }
+                            if (!isExist) {
+                                dirPre.addChild(new FileSystem(newFile, 0, 755, 'user', 'user'))
+                            } else {
+                                dirPre.createdAt = new Date()
+                            }
                         // どっちも存在する場合
                         } else {
                             // timestamp 更新
