@@ -1,5 +1,5 @@
 <template>
-  <div class="command-line" @click="cursorInput()">
+  <div class="command-line" @click="cursorInput()" @keydown.37="cursorLeft" @keydown.39="cursorRight"  @keydown.enter="pos=0">
     <div class="header-container">
       <div class="button-box">
         <div class="red"></div>
@@ -16,8 +16,15 @@
       </div>
     </div>
     <div class="input-line">
-      <div><span class="init">$</span>{{$store.state.inputLine}}<span class="caret" :style="{'background': isFocus ? '#f0f0f0' : 'transparent'}"></span></div>
+      <div><span class="init">$</span>{{$store.state.inputLine}}<span class="caret" :style="{'margin-left': (pos + 2) + 'px', 'background': isFocus ? '#f0f0f0aa' : 'transparent'}"></span></div>
       <input id="input" @blur="offCursor()" @keydown.enter="$store.commit('commandSend')" v-model="$store.state.inputLine"/>
+    </div>
+    <!-- debug -->
+    <div style="position: fixed; top: 0; left: 0; width: 100px; height: 150px; background: white; color: black;">
+      <p>pos: {{pos}}</p>
+      <p>pos/8: {{pos / 8}}</p>
+      <p>inputLine: {{$store.state.inputLine.length}}</p>
+      <p>inputPos: {{posi}}</p>
     </div>
   </div>
 </template>
@@ -27,14 +34,29 @@ export default {
   name: "CommandLine",
   data () {
     return {
-      isFocus: false
+      isFocus: false,
+      pos: 0,
+      posi: null
     }
   },
   computed : {
   },
   mounted () {
+    this.posi = document.getElementById('input').addEventListener('keyup', e => {
+      console.log('Pos: ', e.target.selectionStart)
+    })
   },
   methods: {
+    cursorLeft () {
+      if (!this.$store.state.inputLine) return
+      if (this.$store.state.inputLine.length <= -1 * (this.pos / 8)) return
+      this.pos -= 8
+    },
+    cursorRight () {
+      if (!this.$store.state.inputLine) return
+      if (this.pos >= 0) return
+      this.pos += 8
+    },
     cursorInput () {
       console.log('cursor')
       document.getElementById('input').focus()
@@ -137,7 +159,7 @@ export default {
       width: 6px;
       height: 13px;
       background: transparent;
-      border: solid thin #f8f8f8;
+      border: solid thin #f0f0f0aa;
     }
   }
   input {
